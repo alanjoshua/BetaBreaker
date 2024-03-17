@@ -1,0 +1,43 @@
+# https://docs.docker.com/compose/
+version: "3.9"
+
+services:
+  
+  betabreaker:
+    build:
+      dockerfile: py3/Dockerfile
+    restart: no
+    tty: true
+
+    container_name: betabreaker
+
+    # command: uvicorn main:app --host 0.0.0.0
+
+    ports:
+      - "0.0.0.0:8005:8000"
+    volumes:
+      - ~/.vscode-server:/root/.vscode-server # (WSL) VSCode
+      - ./workspace:/workspace # workspaceのマッピング
+
+    environment:
+      # MKL magic environment for AMD processor
+      # CUDA
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+      - "FORCE_CUDA=1"
+       # WSLg
+      - DISPLAY=$DISPLAY
+      - WAYLAND_DISPLAY=$WAYLAND_DISPLAY
+      - XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+      - PULSE_SERVER=$PULSE_SERVER
+    
+    shm_size: 16gb
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities:
+                - gpu
